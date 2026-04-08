@@ -1,0 +1,111 @@
+sqlite3 longlist.db
+.schema #to view the commands used to create a particular table.
+.schema <table name>
+
+
+PS D:\DevOps\SQL\designing> sqlite3 mbta.db
+SQLite version 3.51.1 2025-11-28 17:28:25
+Enter ".help" for usage hints.
+sqlite> .schema
+sqlite> CREATE TABLE "riders" (
+(x1...>     "id",
+(x1...>     "name"
+(x1...> );
+sqlite> .schema
+CREATE TABLE IF NOT EXISTS "riders" (
+    "id",
+    "name"
+);
+sqlite>
+
+sqlite> CREATE TABLE "stations" (
+(x1...>     "id",
+(x1...>     "name",
+(x1...>     "line"
+(x1...> );
+sqlite> .schema
+CREATE TABLE IF NOT EXISTS "riders" (
+    "id",
+    "name"
+);
+CREATE TABLE IF NOT EXISTS "stations" (
+    "id",
+    "name",
+    "line"
+);
+sqlite>
+
+#relating two tables as many to many
+sqlite> CREATE TABLE "visits" (
+(x1...>     "rider_id",
+(x1...>     "station_id"
+(x1...> );
+sqlite> .schema
+
+sqlite> DROP TABLE "riders";
+sqlite> DROP TABLE "stations";
+sqlite> DROP TABLE "visits";  
+sqlite> .schema
+sqlite> 
+
+
+PS D:\DevOps\SQL\designing> code schema.sql
+PS D:\DevOps\SQL\designing> sqlite3 .\mbta.db
+SQLite version 3.51.1 2025-11-28 17:28:25
+Enter ".help" for usage hints.
+sqlite> .read schema.sql
+sqlite> .schema
+CREATE TABLE IF NOT EXISTS "riders" (
+    "id" INTEGER,
+    "name" TEXT
+);
+CREATE TABLE IF NOT EXISTS "stations" (
+    "id" INTEGER,
+    "name" TEXT,
+    "line" TEXT
+);
+CREATE TABLE IF NOT EXISTS "visits" (
+    "rider_id" INTEGER,
+    "station_id" INTEGER
+);
+sqlite>
+
+
+sqlite> ALTER TABLE "visits" RENAME TO "swipes";
+sqlite> .schema
+CREATE TABLE IF NOT EXISTS "riders" (
+    "id" INTEGER,
+    "name" TEXT
+);
+CREATE TABLE IF NOT EXISTS "stations" (
+    "id" INTEGER,
+    "name" TEXT,
+    "line" TEXT
+);
+CREATE TABLE IF NOT EXISTS "swipes" (
+    "rider_id" INTEGER,
+    "station_id" INTEGER
+);
+sqlite> 
+
+sqlite> ALTER TABLE "swipes" ADD COLUMN "type" TEXT;
+sqlite> .schema
+CREATE TABLE IF NOT EXISTS "riders" (
+    "id" INTEGER,
+    "name" TEXT
+);
+CREATE TABLE IF NOT EXISTS "stations" (
+    "id" INTEGER,
+    "name" TEXT,
+    "line" TEXT
+);
+CREATE TABLE IF NOT EXISTS "swipes" (
+    "rider_id" INTEGER,
+    "station_id" INTEGER
+, "type" TEXT);
+sqlite> ALTER TABLE "swipes" RENAME COLUMN "type" TO "type";
+sqlite> 
+
+sqlite> ALTER TABLE "swipes" DROP COLUMN "type";
+
+

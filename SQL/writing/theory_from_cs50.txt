@@ -1,0 +1,15 @@
+sqlite> .read schema.sql
+
+sqlite> INSERT INTO "collections" ("id","title","accession_number","aquired")
+   ...> VALUES (1, 'Profusion of flowers', '56.257', '1956-04-12'); 
+sqlite> SELECT * FROM "collections";
+1|Profusion of flowers|56.257|1956-04-12
+sqlite> 
+
+sqlite> INSERT INTO "collections" ("title","accession_number","aquired")     
+   ...> VALUES ('Spring outing', '14.76', '1911-01-08');                
+sqlite> SELECT * FROM "collections";
+1|Profusion of flowers|56.257|1956-04-12
+2|Farmers working at dawn|11.6152|1911-08-03
+3|Spring outing|14.76|1911-01-08
+sqlite> 
