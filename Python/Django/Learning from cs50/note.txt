@@ -167,7 +167,7 @@ project1(d)
     newyearapp1(d)
         static(d)
             newyearapp(d)
-                style.css
+                styles.css
 &&h1 {
     font-family: sans-serif;
     font-size: 90px;
@@ -181,3 +181,14 @@ project1(d)
         <title>Is it new year</title>
         <link href="{% static 'newyearapp/style.css' %}" rel="stylesheet">
 &&
+
+####Creating a new app
+python manage.py startapp taskapp1
+&&tasks = ["foo", "bar", "baz"]
+# Create your views here.
+def index(request):
+    return render(request, "taskapp1/index.html", {
+        "tasks":tasks
+    })
+&&
+in the index.html:
