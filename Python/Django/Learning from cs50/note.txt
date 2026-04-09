@@ -1,0 +1,183 @@
+HTML - Discribe the structure of the web page
+CSS - To style it
+Python - A language to get programming features (loops, conditions, functions etc.)
+Django - A web framework which allows to write python code that is able to dynamically
+generate HTML and css and ultimately allow to build dynamic web applications.
+
+Only html & CSS- static web pages (no changing of content)
+
+Dynamic : allows web apps to interact with users.
+
+#web browser sending get request
+GET / HTTP/1.1
+Host: www.example.com
+
+#response from the server
+HTTP/1.1 200 OK
+Content-Type: text/html
+
+HTTP status codes
+200 OK
+301 Moved Permanently
+403 Forbidden
+404 Not Found
+500 Internal Server Error
+
+#creating a project
+django-admin startproject <project name>
+
+project1(d)
+    project1(d)
+        asgi.py
+        settings.py ##configuration settings for django app
+        urls.py  ##table of content of all the urls of the app that can visit
+        wsgi.py
+        __init__.py
+    manage.py    ##to execute commands on the django project
+
+#running the web server
+$python manage.py runserver
+#default port 8000
+
+creating an application 
+$python manage.py startapp hello
+
+
+project1(d)
+    application1(d)
+        migrations(d)
+        admin.py
+        apps.py
+        models.py
+        tests.py
+        views.py
+        __init__.py
+        urls.py
+    project1(d)
+        asgi.py
+        settings.py ##configuration settings for django app
+        urls.py  ##table of content of all the urls of the app that can visit
+        wsgi.py
+        __init__.py
+    db.sqlite3
+    manage.py    ##to execute commands on the django project
+
+installing newly created application to the project
+$PS D:\DevOps\Python\Django\Learning from cs50\project1\project1> code .\settings.py
+&&INSTALLED_APPS = [
+    'application1'
+    'django.contrib.admin',
+    'django.contrib.auth',
+&&
+
+in views.py defining a function to create a views
+&&from django.http import HttpResponse
+from django.shortcuts import render
+
+# Create your views here.
+def index(request):
+    return HttpResponse("Hello, world!")
+&&
+
+In addition to urls.py that works for entire project, we should have seperate urls.py for each app
+&&from django.urls import path
+from . import views
+
+urlpatterns = [
+    path("", views.index, name="index")
+]
+&&
+
+then in the urls.py in main project
+&&from django.urls import include,path
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('application1/', include("application1.urls"))
+]
+&&
+
+
+Creating a new view, 
+&&def chaluka(request):
+    return HttpResponse("Hello, Chaluka")
+&&
+Updating the urls.py of that particular application
+
+&&urlpatterns = [
+    path("", views.index, name="index"),
+    path("chaluka", views.chaluka, name="chaluka")
+]
+&&
+
+a function which takes an additional parameter
+&&def greet(request, name):
+    return HttpResponse(f"Hello, {name}!")
+&&
+
+&&path("<str:name>",views.greet, name="greet"),
+
+Seperating html response from the actual python code
+Rendering an entire html file 
+&&def index(request):
+    return render(request, "appliation1/index.html")
+&&
+Now we have to create that template(index.html)
+
+project1(d)
+    application1(d)
+        templates(d)
+            appliation1(d)
+                index.html
+
+** django can add templating language over this existing html
+so we can add variable, loop, conditionals by rendering that html
+&&def greet(request, name):
+    return render(request, "appliation/greet.html", {
+        "name": name.capitalize()
+    })
+&&
+&&path("<str:name>",views.greet, name="greet"),
+&&<h1>Hello, {{ name }}!</h1>&&
+
+
+Creating a new app 'newyearapp'
+PS D:\DevOps\Python\Django\Learning from cs50\project1> python manage.py startapp newyearapp
+project1(d)
+    application1(d)
+    newyearapp1(d)
+
+&&def index(request):
+    now = datetime.datetime.now
+    return render(request, "newyear/index.html", {
+        "newyear": now.month == 1 and now.day == 1
+    })
+&&
+&&   <body>
+        {% if newyear  %}
+            <h1>YES</h1>
+        {% else %}    
+            <h1>NO</h1>
+        {% endif %}
+    </body>
+&&
+
+To store static files seperately
+project1(d)
+    newyearapp1(d)
+        static(d)
+            newyearapp(d)
+                style.css
+&&h1 {
+    font-family: sans-serif;
+    font-size: 90px;
+    text-align: center;
+}
+&&
+&&{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Is it new year</title>
+        <link href="{% static 'newyearapp/style.css' %}" rel="stylesheet">
+&&

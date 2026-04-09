@@ -13,3 +13,44 @@ sqlite> SELECT * FROM "collections";
 2|Farmers working at dawn|11.6152|1911-08-03
 3|Spring outing|14.76|1911-01-08
 sqlite> 
+
+
+sqlite> INSERT INTO "collections" ("title", "accession_number", "aquired")
+   ...> VALUES                            
+   ...> ('Imaginative Landscape', '56.496', NULL),  
+   ...> ('Hariyeh', '06.12849', '1906-01-01');
+sqlite> 
+
+PS D:\DevOps\SQL\writing> code mfs.csv
+PS D:\DevOps\SQL\writing> sqlite3 mfa.db
+SQLite version 3.51.1 2025-11-28 17:28:25
+Enter ".help" for usage hints.
+sqlite> .schema
+sqlite> .read schema.sql
+sqlite> .schema
+CREATE TABLE IF NOT EXISTS "collections" (
+    "id" INTEGER,
+    "title" TEXT NOT NULL,
+    "accession_number" TEXT NOT NULL UNIQUE,
+    "aquired" NUMERIC,
+    PRIMARY KEY("id")
+);
+sqlite> .import --csv --skip 1 mfs.csv collections
+
+
+DELETE FROM "collections";
+sqlite> .import --csv mfs2.csv temp
+sqlite> .schema
+CREATE TABLE IF NOT EXISTS "collections" (
+    "id" INTEGER,
+    "title" TEXT NOT NULL,
+    "accession_number" TEXT NOT NULL UNIQUE,
+    "aquired" NUMERIC,
+    PRIMARY KEY("id")
+);
+CREATE TABLE IF NOT EXISTS "temp"(
+"title" TEXT, "accession_number" TEXT, "acquired" TEXT);
+sqlite> INSERT INTO "collections" ("title", "accession_number", "aquired")
+   ...> SELECT "title", "accession_number", "acquired" FROM "temp";  
+
+   33.18
