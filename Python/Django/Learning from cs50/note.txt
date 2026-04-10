@@ -192,3 +192,126 @@ def index(request):
     })
 &&
 in the index.html:
+&&{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Tasks</title>
+    </head>
+    <body>
+        <ul>
+            {% for task in tasks %}
+                <li>{{ task }}</li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>
+&&
+
+a new file 'layout.html' basic layout common to both pages
+&&<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Tasks</title>
+    </head>
+    <body>
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>
+&&
+and then changing the index.html and add.html
+&&{% extends "taskapp1/layout.html" %}
+
+{% block body %}
+    <h1>Tasks</h1>
+    <ul>
+        {% for task in tasks %}
+            <li>{{ task }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+&&
+&&{% extends "tasks/layout.html" %}
+
+{% block body %}
+    <h1>Add task</h1>
+    <form>
+        <input type="text" name="task">
+        <input type="submit">
+    </form>
+{% endblock %}
+&&
+
+adding a link to go from index.html to add.html
+instead of writing this "<a href="/taskapp1/add">Add a New Task</a>" in index.html
+" <a href="{% url 'add' %}">Add a New Task</a>"
+django auto figureout using urls.py
+going back
+<a href="{% url 'index' %}">View Tasks</a>
+if it start linking to anothe index.html in another app urls.py, do this,
+in the particular app urls.py
+&&
+app_name="taskapp1"
+urlpatterns = [
+    path("", views.index, name="index"),
+&&
+&& <a href="{% url 'taskapp1:add' %}">Add a New Task</a>
+
+
+#adding an action to the form using POST
+&&<h1>Add task</h1>
+    <form action="{% url 'taskapp1:add' %}" method="post">
+        <input type="text" name="task">
+&&
+
+using CSRF tocket to submit the details to the form with a generated tocken
+by default CSRF is enabled by django using module middleware (see the settings.py)
+#adding tocken into the html page
+&&<form action="{% url 'taskapp1:add' %}" method="post">
+        {% csrf_token %}
+        <input type="text" name="task">
+&&
+page source&&
+  <form action="/taskapp1/add" method="post">
+        <input type="hidden" name="csrfmiddlewaretoken" value="kRGfPxOMI5amsy336Lvq4XG5ZygSTUcKlVeKMOzGrWJkqgoYUvn4BJS149NnfubL">
+        <input type="text" name="task">
+&&
+
+#django alternative way for creating forms from scratch
+Creating a new task form and passing it to the index.html
+&&from django.shortcuts import render
+from django import forms
+
+tasks = ["foo", "bar", "baz"]
+
+class NewTaskForm(forms.Form):
+    task = forms.CharField(label="New Task")
+
+# Create your views here.
+def index(request):
+    return render(request, "taskapp1/index.html", {
+        "tasks":tasks
+    })
+
+def add(request):
+    return render(request, "taskapp1/add.html", {
+        "form": NewTaskForm()
+    })
+&&
+In the add.html
+&&{% csrf_token %}
+        {{ form }}
+        <input type="submit">
+&&
+
+Now without touching html file, we can change the form from python code.
+Also it automatically do clinet side validation
+eg: adding a new field 
+&&in views.py
+task = forms.CharField(label="New Task")
+    priority = forms.IntegerField(label="Priority", min_value=1, max_value=10)
+&&
+
+1.22.32
