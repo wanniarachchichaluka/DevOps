@@ -1,0 +1,18 @@
+UPDATE flights
+    SET duration = 430
+    WHERE origin = "New York"
+    AND destination = "London";
+
+DELETE FROM flights WHERE destination = "Tokyo";
+
+SELECT first, origin, destination
+    FROM flights JOIN passengers
+ON passengers.flight_id = flights.id;
+
+####Creating index in a table
+CREATE INDEX name_index ON passengers (last);
+
+#SQL injections
+#Race condition
+
+#46
