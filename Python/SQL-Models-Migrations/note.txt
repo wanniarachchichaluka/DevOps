@@ -15,4 +15,473 @@ CREATE INDEX name_index ON passengers (last);
 #SQL injections
 #Race condition
 
-#46
+#Representing data in terms of models
+#Creating models in urls.py
+A way of creating a python class that is going to represent data that I want django
+to store inside of a database. (every model is a python class for every table we care abt storing info)
+Inside models.py
+
+&&from django.db import models
+
+# Create your models here.
+class Flights(models.Model):
+    origin = models.CharField(max_length=64)
+    destination = models.CharField(max_length=64)
+    duration = models.IntegerField()
+&&
+A migration abt changes to apply for the database
+Creating the migration (which was done above)
+Doing the migration
+$python manage.py makemigrations
+before
+&&Mode                 LastWriteTime         Length Name             
+----                 -------------         ------ ----             
+d-----         4/15/2026   6:32 AM                airline          
+d-----         4/15/2026   6:34 AM                flights          
+-a----         4/15/2026   6:29 AM            685 manage.py 
+&&
+after
+&&PS D:\DevOps\Python\SQL-Models-Migrations\airline> ls
+
+
+    Directory: D:\DevOps\Python\SQL-Models-Migrations\airline
+
+
+Mode                 LastWriteTime         Length Name             
+----                 -------------         ------ ----             
+d-----         4/15/2026   6:32 AM                airline          
+d-----         4/15/2026   7:28 AM                flights          
+-a----         4/15/2026   7:28 AM              0 db.sqlite3       
+-a----         4/15/2026   6:29 AM            685 manage.py  
+&&
+#applying the migrations to django database
+$python .\manage.py migrate
+&&PS D:\DevOps\Python\SQL-Models-Migrations\airline> ls
+
+
+    Directory: D:\DevOps\Python\SQL-Models-Migrations\airline
+
+
+Mode                 LastWriteTime         Length Name             
+----                 -------------         ------ ----             
+d-----         4/15/2026   6:32 AM                airline          
+d-----         4/15/2026   7:28 AM                flights          
+-a----         4/15/2026   7:30 AM         135168 db.sqlite3       
+-a----         4/15/2026   6:29 AM            685 manage.py        
+&&
+
+to run python commands to executed on the python web application
+$python manage.py shell
+#then importing the flight class
+>>> from flights.models import Flights
+>>> f = Flights(origin="New York", destination="London", duration=415)
+>>> f.save()
+>>> Flights.objects.all()
+<QuerySet [<Flights: Flights object (1)>]>
+#to get the string representation of that object
+
+In models.py
+&&def __str__(self):
+        return f"{self.id}: {self.origin} to {self.destination}"
+&&
+>>> from flights.models import Flights
+>>> flights = Flights.objects.all()
+>>> flights
+<QuerySet [<Flights: 1: New York to London>]>
+>>> 
+>>> flight = flights.first()
+>>> flight
+<Flights: 1: New York to London>
+>>> 
+>>> flight.id
+1
+>>> flight.origin
+'New York'
+>>> 
+>>> flight.delete()
+(1, {'flights.Flights': 1})
+>>> 
+
+in models.py
+&&class Airport(models.Model):
+    code = models.CharField(max_length=3)
+    city = models.CharField(max_length=64)
+
+    def __str__(self):
+        return f"{self.city} ({self.code})"
+
+class Flights(models.Model):
+    origin = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="departures")
+    destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="arrivals")
+    duration = models.IntegerField()
+&&
+
+$python manage.py makemigrations
+Migrations for 'flights':
+  flights\migrations\0002_airport_alter_flights_destination_and_more.py
+    + Create model Airport
+    ~ Alter field destination on flights
+    ~ Alter field origin on flights
+#Applying those changes
+python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, flights, sessions
+Running migrations:
+  Applying flights.0002_airport_alter_flights_destination_and_more... OK
+
+
+PS D:\DevOps\Python\SQL-Models-Migrations\airline> python manage.py shell
+14 objects imported automatically (use -v 2 for details).
+
+Python 3.13.9 (tags/v3.13.9:8183fa5, Oct 14 2025, 14:09:13) [MSC v.1944 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> from flights.models import *
+>>> jfk = Airport(code="JFK", city="New York")
+>>> jfk.save()
+>>> lhr = Airport(code="LHR", city="London")  
+>>> lhr.save()
+>>> cdg = Airport(code="CDG", city="Paris") 
+>>> cdg.save()
+>>> nrt = Airport(code="NRT", city="Tokyo")
+>>> nrt.save()
+>>> f = Flight(origin=jfk, destination=lhr, duration=415)
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+NameError: name 'Flight' is not defined. Did you mean: 'Flights'?
+>>> f = Flights(origin=jfk, destination=lhr, duration=415)
+>>> f.save()
+>>> f
+<Flights: 1: New York (JFK) to London (LHR)>
+>>> 
+
+then in the Flights urls.py
+from . import views
+urlpatterns = [
+    path("",views.index,name="index")
+]
+
+Then in the views.py
+&&from .models import Flight
+# Create your views here.
+def index(request):
+    return render(request, "flights/index.html", {
+        "flights": Flight.objects.all()
+    })
+&&
+
+#inside flights create new folder templates/flights/layout.html
+&&<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Flights</title>
+    </head>
+    <body>
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>
+&&
+#Then index.html
+&&
+{% extends "flights/layout.html" %}
+
+{% block body %}
+    <h1>Flights</h1>
+    <ul>
+        {% for flight in flights %}
+            <li>Flight {{ flight.id }}: {{ flight.origin }} to {{ flight.destination }}</li>
+    </ul>
+&&
+
+
+While running the server through:
+$python manage.py runserver
+ls-Migrations\airline> python manage.py shell
+14 objects imported automatically (use -v 2 for details).
+
+Ctrl click to launch VS Code Native REPL
+Python 3.13.9 (tags/v3.13.9:8183fa5, Oct 14 2025, 14:09:13) [MSC v.1944 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> from flights.models import *
+>>> Airport.objects.all()   
+<QuerySet [<Airport: New York (JFK)>, <Airport: London (LHR)>, <Airport: Paris (CDG)>, <Airport: Tokyo (NRT)>]>
+>>> Airport.objects.filter(city="New York")
+<QuerySet [<Airport: New York (JFK)>]>
+>>> Airport.objects.filter(city="New York").first()
+<Airport: New York (JFK)>
+>>> Airport.objects.get(city="New York")           
+<Airport: New York (JFK)>
+>>> jfk = Airport.objects.get(city="New York")
+>>> cdg = Airport.objects.get(city="Paris")   
+>>> f = Flight(origin=jfk, destination=cdg, duration=435)
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+NameError: name 'Flight' is not defined. Did you mean: 'Flights'?
+>>> f = Flights(origin=jfk, destination=cdg, duration=435)
+>>> f.save()
+>>> 
+Then refresh the page
+
+#upuntil now when we are adding a new flight or any data, we had to loggin to shell and add manually,
+Solution: django admin app
+To use admin app, we need to create a django admin account inside the django web application
+PS D:\DevOps\Python\SQL-Models-Migrations\airline> python manage.py createsuperuser
+Username (leave blank to use 'user'): chaluka
+Email address: chalukawanniarachchi@gmail.com
+Password: 
+Password (again): 
+Superuser created successfully.
+PS D:\DevOps\Python\SQL-Models-Migrations\airline> 
+
+Now we need to add the modules to the admin app
+Inside admin.py:
+&&from .models import Flight, Airport
+# Register your models here.
+admin.site.register(Airport)
+admin.site.register(Flight)
+&&
+
+Then run the server and go to
+http://127.0.0.1:8000/admin
+Now I can manipulate the data through the admin app
+
+Adding a new fnction
+in the urls.py
+&&from . import views
+urlpatterns = [
+    path("",views.index,name="index"),
+    path("<int:flight_id>", views.flights, name="flight")
+]
+&&
+
+then in the views.py
+&&
+def flight(request, flight_id):
+    flight = Flights.objects.get(pk=flight_id)
+    return render*request, "flights/flight.html", {
+        "flight": flight
+    }
+&&
+Then in the flight.html
+&&{% extends "flights/layout.html" %}
+
+{% block body %}
+    <h1>Flight {{ flights.id }}</h1>
+    <ul>
+        <li>Origin: {{ flight.origin }}</li>
+        <li>Destination: {{ flight.destination }}</li>
+        <li>Duration: {{ flight.duration }}</li>
+    </ul>
+{% endblock %}
+&&
+
+Adding passengers,
+&&
+class Passenger(models.Model):
+    first = models.CharField(max_length=64)
+    last = models.CharField(max_length=64)
+    flights = models.ManyToManyField(Flights, blank=True, related_name="passengers")
+
+    def __str__(self):
+        return f"{self.first} {self.last}"
+&&
+Applying changes
+$python .\manage.py makemigrations
+and in the admin.py
+&&from django.contrib import admin
+
+from .models import Flights, Airport, Passenger
+# Register your models here.
+admin.site.register(Airport)
+admin.site.register(Flights)
+admin.site.register(Passenger)
+&&
+
+In the views.py
+&&return render(request, "flights/flight.html", {
+        "flight": flight,
+        "passengers": flight.passengers.all()
+    })
+&&
+in the flight.html
+&&
+    <h2>Passengers</h2>
+
+    <ul>
+        {% for passenger in passengers %}
+            <li>{{ passenger }}</li>
+        {% empty %}
+            <li>No passengers.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+&&
+
+#giving ability to add the passengers
+In urls.py
+&&path("<int:flight_id>/book", view.book, name="book")
+]&&
+
+#in views.py
+&&from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from .models import Flights
+# Create your views here.
+def index(request):
+    return render(request, "flights/index.html", {
+        "flights": Flights.objects.all()
+    })
+
+def flight(request, flight_id):
+    flight = Flights.objects.get(pk=flight_id)
+    return render(request, "flights/flight.html", {
+        "flight": flight,
+        "passengers": flight.passengers.all()
+    })
+
+def book(request, flight_id):
+    if request.method == "POST":
+        flight = Flights.objects.get(pk=flight_id)
+        passenger = Passenger.objects.get(pk=int(request.POST["passenger"]))
+        passenger.flights.add(flights)
+        return HttpResponseRedirect(reverse("flight", args=(flight.id,)))
+&&
+
+in the views.py getting access to variable non_passengers
+&&return render(request, "flights/flight.html", {
+        "flight": flight,
+        "passengers": flight.passengers.all(),
+        "non_passengers": Passenger.objects.exclude(flights=flight).all()
+    })
+&&
+#adding a form in the flight.html
+&&<h2>Add Passenger</h2>
+
+    <form action="{% url 'book' flight.id %}" method="post">
+        {% csrf_tocken %}
+        <select name=""passenger">
+            {% for passenger in non_passengers %}
+                <option value="{{ passenger,id }}">{{ passenger }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit">
+    </form>
+&&
+#in admin.py
+&&
+from django.contrib import admin
+
+from .models import Flights, Airport, Passenger
+# Register your models here.
+class FlightAdmin(admin.ModelAdmin):
+    list_display = ("id","origin", "destination", "duration")
+class PassengerAdmin(admin.ModelAdmin):
+    filter_horizontal = ("flights",)
+
+admin.site.register(Airport)
+admin.site.register(Flights, FlightAdmin)
+admin.site.register(Passenger, PassengerAdmin)
+&&
+
+####creating another app for managing users
+python manage.py startapp users
+
+&&urlpatterns = [
+    path("", views.index, name="index"),
+    path("login", views.login_view, name="login"),
+    path("logout", views.logout_view, name="logout")
+]
+&&
+#Now need to create those functions
+&&from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
+# Create your views here.
+def index(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("login"))
+    
+def login_request(request):
+    return render(request, "user/login.html")
+&&
+
+#need to create templates
+inside layout.html
+&&<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Users</title>
+    </head>
+    <body>
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>
+&&
+login.html
+&&
+{% extends "users/layout.html" %}
+
+{% block body %}
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+
+    <form action="{ url 'login' %}" method="post">
+        {% csrf_tocken %}
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <input type="submit" value="login">
+    </form>
+{% endblock %}
+&&
+user.html
+&&{% extends "users/layout.html" %}
+
+{% block body %}
+    <h1>Welcome, {{ request.user.first_name }}</h1>
+
+    <ul>
+        <li>Username: {{ request.user.username }}</li>
+        <li>Email: {{ request.user.email }}</li>
+    </ul>
+{% endblock %}
+&&
+
+views.py
+&&from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
+# Create your views here.
+def index(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("login"))
+    return render(request, "users/user.html")
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect(reverse("index"))
+        else:
+            return render(request, "users/login.html", {
+                "message": "Invalid credentials."
+            })
+    return render(request, "user/login.html")
+
+def logout_view(request):
+    logout(request)
+    return render(request, "users/login.html", {
+        "message": "Logged out."
+    })
+&&
+
+
