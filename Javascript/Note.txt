@@ -1,0 +1,220 @@
+Javascript enable to write the code in the client side.
+We don't need to reach out for a server for computation
+enable more interactive.
+Client browser side.
+
+DOM manipulation
+&&<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Counter</title>
+        <script>
+            let counter = 0;
+            function count() {
+                counter++;
+                document.querySelector('h1').innerHTML=counter;
+                
+                if (counter % 10 === 0) {
+                    alert(`Count is now ${counter}`)
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <h1>0</h1>
+        <button onclick="count()">Count</button>
+    </body>
+</html>
+&&
+&&
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Hello</title>
+        <script>
+            function hello(){
+                //let heading = document.querySelector('h1');
+                const heading = document.querySelector('h1');
+                if (heading.innerHTML === 'Hello!') {
+                    //try and find h1 element
+                    heading.innerHTML='Goodbye';
+                } else {
+                    heading.innerHTML='Hello!';
+                }
+                //alert('Hello, world!');
+            }
+        </script>
+    </head>
+    <body>
+        <h1>Hello!</h1>
+        <button onclick="hello()">Click here</button>
+    </body>
+</html>
+&&
+Seperating JS code from hTML code
+method 1: using event listener
+//after all of the content of the page is loaded
+&document.addEventListener('DOMContentLoaded')
+//take two arguments, event and the function
+&&document.addEventListener('DOMContentLoaded', function(){
+                
+            })
+&&
+
+&&&&&&&&&&&
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Counter</title>
+        <script>
+            let counter = 0;
+            function count() {
+                counter++;
+                document.querySelector('h1').innerHTML=counter;
+                
+                if (counter % 10 === 0) {
+                    alert(`Count is now ${counter}`)
+                }
+            }
+            //adding an eventlister to the entire document to trying to find the button, h1 etc.
+            document.addEventListener('DOMContentLoaded', function(){
+                //after all the content of the DOM loaded, then run the function
+                document.querySelector('button').onclick = count;
+            });
+            //count is the function that is need to run when click on the button
+        </script>
+    </head>
+    <body>
+        <h1>0</h1>
+        <button>Count</button>
+    </body>
+</html>
+&&&&&&&&&&&&&&&&&&&&&&&&7
+
+#Moving JS code into a seperate file
+#counter.js
+&&
+        let counter = 0;
+        function count() {
+            counter++;
+            document.querySelector('h1').innerHTML=counter;
+            
+            if (counter % 10 === 0) {
+                alert(`Count is now ${counter}`)
+            }
+        }
+        //adding an eventlister to the entire document to trying to find the button, h1 etc.
+        document.addEventListener('DOMContentLoaded', function(){
+            //after all the content of the DOM loaded, then run the function
+            document.querySelector('button').onclick = count;
+        });
+        //count is the function that is need to run when click on the button
+&&
+and in counter.html
+&<script src="counter.js"></script>
+
+####Theory######
+1-document.querySelector('tag')
+2-document.querySelector('#id')
+eg:const name = document.querySelector('#name').value;
+<input autofocus id="name" placeholder="Name" type="text">
+3-document.querySelector('.class')
+
+#changing style propert(css) of an element
+&&
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Hello</title>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelector('form').onsubmit = function() {
+                    const name = document.querySelector('#name').value;
+                    alert(`Hello, ${name}!`);
+                };
+            });
+        </script>
+    </head>
+    <body>
+        <h1>Hello!</h1>
+        <form>
+            <input autofocus id="name" placeholder="Name" type="text">
+            <input type="submit">
+        </form>
+    </body>
+</html>
+&&
+
+##consolidating three event listerns into a single function
+#using data attributes
+&&<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Colors</title>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                //changing font color to red
+                document.querySelectorAll('button').forEach(function(button) {
+                    button.onclick = function() {
+                        document.querySelector('#hello').style.color = button.dataset.color;
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <h1 id="hello">Hello!</h1>
+        <button data-color="red">Red</button>
+        <button data-color="blue">Blue</button>
+        <button data-color="green">Green</button>
+    </body>
+</html>
+&&
+
+#shorthand for creating a function
+() =>
+
+#intervals
+&&//adding an eventlister to the entire document to trying to find the button, h1 etc.
+        document.addEventListener('DOMContentLoaded', function(){
+            //after all the content of the DOM loaded, then run the function
+            document.querySelector('button').onclick = count;
+            setInterval(count, 1000);
+        });
+&&
+
+##local storage
+localStorage.getItem(key)
+localStorage.setItem(key, value)
+
+
+##Javascript objects (like python dictionaries)
+let person = {
+    first: 'Harry',
+    last: 'Potter'
+};
+person["first"]
+person.first
+
+#APIs (Well defined structured way for services on the internet to communicate with each other )
+JSON : transfering data in the form of javascript objects
+eg:
+{
+    "origin": {
+        "city": "New York",
+        "code": "JFK"
+    }
+    "destination": {
+        "city": "London",
+        "code": "LHR"
+    }
+    "duration": 415
+}
+
+#AJS
+#Asynchronous java script
+requiring additional info from other servers or APIs.
+fetch going to get back to us a 'promise' (may be come back, but not immediately)
+
+
+#catch case
